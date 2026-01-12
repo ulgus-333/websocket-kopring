@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Chat</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.0/sockjs.min.js"></script>
+    <link rel="stylesheet" href="/main.css">
+</head>
+<body>
+<nav class="navbar navbar-default">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse" aria-expanded="false">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">Chat App</a>
+        </div>
+        <div class="collapse navbar-collapse" id="navbar-collapse">
+            <div class="navbar-right">
+                <div style="display: inline-block; vertical-align: middle; margin-right: 15px;">
+                    <table style="text-align: left;">
+                        <tbody>
+                            <tr>
+                                <td style="text-align: right; padding-right: 5px;"><strong>Email:</strong></td>
+                                <td><span id="userEmail"></span></td>
+                            </tr>
+                            <tr>
+                                <td style="text-align: right; padding-right: 5px;"><strong>Nickname:</strong></td>
+                                <td><span id="userNickname"></span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="btn-group navbar-btn" role="group" style="display: inline-block; vertical-align: middle;">
+                    <button type="button" class="btn btn-default" id="myPageBtn" title="My Page">
+                        <span class="glyphicon glyphicon-user"></span> My Page
+                    </button>
+                    <button type="button" class="btn btn-default" id="logoutBtn" title="Logout">
+                        <span class="glyphicon glyphicon-log-out"></span> Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Chat Room List (Left Column) -->
+        <div class="col-xs-12" id="roomListColumn">
+            <div class="panel panel-default">
+                <div class="panel-heading" style="display: flex; align-items: center; justify-content: space-between;">
+                    <span style="flex-basis: 120px;">Chat Rooms</span>
+                    <div style="flex-grow: 1; text-align: center;">
+                        <button id="createRoomBtn" class="btn btn-primary btn-sm">Create Room</button>
+                    </div>
+                    <div style="flex-basis: 120px; text-align: right;">
+                        <button id="backToInitialView" class="btn btn-sm btn-default" style="display: none;">Back</button>
+                    </div>
+                </div>
+                <div id="chatRooms" class="panel-body">
+                    <!-- Chat rooms will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Area (Right Column) -->
+        <div class="col-xs-12" id="chatAreaColumn" style="display: none;">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <button id="leaveRoomBtn" class="btn btn-danger btn-sm">Leave Room</button>
+                    <span id="chatRoomName" class="panel-title" style="margin-left: 10px;"></span>
+                    <button id="hideChatBtn" class="btn btn-default btn-sm pull-right">Hide</button>
+                </div>
+                <div id="messages" class="panel-body" style="height: 400px; overflow-y: scroll;">
+                    <!-- Messages will appear here -->
+                </div>
+                <div class="panel-footer">
+                    <div class="input-group">
+                        <input type="text" id="message" class="form-control" placeholder="Enter your message">
+                        <span class="input-group-btn">
+                            <button id="send" class="btn btn-default" type="button">Send</button>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Chat Room Modal -->
+<div class="modal fade" id="createRoomModal" tabindex="-1" role="dialog" aria-labelledby="createRoomModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <!-- User Search Step -->
+            <div id="user-search-step">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Create Chat Room: Select User</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-xs-offset-1 col-xs-10">
+                            <form class="form-horizontal">
+                                <div class="form-group">
+                                    <label for="user-search-input-name" class="control-label col-xs-4">이름:</label>
+                                    <div class="col-xs-8">
+                                        <input type="text" class="form-control" id="user-search-input-name" placeholder="Enter name">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="user-search-input-email" class="control-label col-xs-4">이메일:</label>
+                                    <div class="col-xs-8">
+                                        <input type="text" class="form-control" id="user-search-input-email" placeholder="Enter email">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-xs-offset-4 col-xs-8 text-right">
+                                        <button class="btn btn-primary" type="button" id="user-search-btn">Search</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div id="user-search-results">
+                        <!-- Search results will be appended here -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+
+            <!-- Room Title Step -->
+            <div id="room-title-step" style="display: none;">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Create Chat Room: Set Title</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="room-title-input">Room Title</label>
+                        <input type="text" class="form-control" id="room-title-input" placeholder="Enter room title (optional)">
+                        <p class="help-block">If you leave this blank, the room title will be the participant's name.</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" id="back-to-search-btn">Back</button>
+                    <button type="button" class="btn btn-primary" id="create-room-confirm-btn">Create</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form id="logoutForm" method="post" action="/logout" style="display: none;"></form>
+<script src="/stomp.js"></script>
+</body>
+</html>
