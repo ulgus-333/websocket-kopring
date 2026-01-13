@@ -6,9 +6,12 @@ import org.springframework.util.Assert
 
 enum class OAuth2UserType (
     val registrationId: String,
-    val userFactory: (Map<String, Any>) -> User
+    val userFactory: (Map<String, Any>) -> User,
+    val attributeName: String
 ) {
-    GOOGLE("google", UserFactory::googleUser),
+    GOOGLE("google", UserFactory::googleUser, ""),
+    NAVER("naver", UserFactory::naverUser, "response"),
+//    KAKAO("kakao", UserFactory::kakaoUser, "profile"),
     ;
 
     companion object {
@@ -23,4 +26,12 @@ enum class OAuth2UserType (
     }
 
     fun generateUser(attributes: Map<String, Any>): User = userFactory(attributes)
+
+    fun extractAttributes(attributes: Map<String, Any>): Map<String, Any> {
+        return if (attributeName.isBlank()) {
+            attributes
+        } else {
+            attributes[attributeName] as Map<String, Any>
+        }
+    }
 }
