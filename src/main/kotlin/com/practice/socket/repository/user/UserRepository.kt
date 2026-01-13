@@ -5,6 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository
 import java.util.Optional
 
 interface UserRepository: JpaRepository<User, Long> {
-    fun findByEmail(email: String): Optional<User>
+    fun findByOAuth2Id(oAuth2Id: String): Optional<User>
 
 }

@@ -5,13 +5,12 @@ import com.practice.socket.util.UserFactory
 import org.springframework.util.Assert
 
 enum class OAuth2UserType (
-    val registrationId: String,
-    val userFactory: (Map<String, Any>) -> User,
-    val attributeName: String
+    private val registrationId: String,
+    private val userFactory: (Map<String, Any>) -> User,
 ) {
-    GOOGLE("google", UserFactory::googleUser, ""),
-    NAVER("naver", UserFactory::naverUser, "response"),
-//    KAKAO("kakao", UserFactory::kakaoUser, "profile"),
+    GOOGLE("google", UserFactory::googleUser),
+    NAVER("naver", UserFactory::naverUser),
+    KAKAO("kakao", UserFactory::kakaoUser),
     ;
 
     companion object {
@@ -26,12 +25,4 @@ enum class OAuth2UserType (
     }
 
     fun generateUser(attributes: Map<String, Any>): User = userFactory(attributes)
-
-    fun extractAttributes(attributes: Map<String, Any>): Map<String, Any> {
-        return if (attributeName.isBlank()) {
-            attributes
-        } else {
-            attributes[attributeName] as Map<String, Any>
-        }
-    }
 }
