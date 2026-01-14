@@ -8,7 +8,7 @@ import java.security.MessageDigest
 
 object CipherUtils {
     fun encrypt(plainText: String): String {
-        val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
+        val cipher = Cipher.getInstance("AES/ECB/PKCS5Padding")
         cipher.init(Cipher.ENCRYPT_MODE, SecretKeySpec(aes128Key(), "AES"))
 
         val encrypted = cipher.doFinal(plainText.toByteArray(StandardCharsets.UTF_8))
