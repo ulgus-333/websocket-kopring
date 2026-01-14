@@ -30,7 +30,8 @@ class User private constructor(
     var imageUrl: String? = null,
 
     @Enumerated(EnumType.STRING)
-    val gender: Gender? = null,
+    @Column(nullable = false)
+    val gender: Gender,
 
     @Column(updatable = false)
     var birth: LocalDate? = null,
@@ -48,6 +49,7 @@ class User private constructor(
                 email = email,
                 name = CipherUtils.encrypt(name),
                 imageUrl = imageUrl ?: DEFAULT_PROFILE,
+                gender = Gender.UNKNOWN,
                 role = Role.USER
             )
 
@@ -59,7 +61,7 @@ class User private constructor(
                 name = CipherUtils.encrypt(name),
                 nickname = nickname,
                 imageUrl = imageUrl ?: DEFAULT_PROFILE,
-                gender = gender?.let(Gender::findByValue),
+                gender = gender?.let(Gender::findByValue) ?: Gender.UNKNOWN,
                 birth = birth,
                 role = Role.USER
             )
@@ -73,7 +75,7 @@ class User private constructor(
                 name = CipherUtils.encrypt(name),
                 nickname = nickname,
                 imageUrl = imageUrl ?: DEFAULT_PROFILE,
-                gender = gender?.let{ g -> Gender.valueOf(g.uppercase()) },
+                gender = gender?.let{ g -> Gender.valueOf(g.uppercase()) } ?: Gender.UNKNOWN,
                 birth = birth,
                 role = Role.USER
             )
