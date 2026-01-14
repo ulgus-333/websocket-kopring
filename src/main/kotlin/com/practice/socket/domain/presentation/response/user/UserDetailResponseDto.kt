@@ -1,4 +1,4 @@
-package com.practice.socket.domain.presentation.response
+package com.practice.socket.domain.presentation.response.user
 
 import com.practice.socket.domain.entity.type.Gender
 import com.practice.socket.domain.entity.user.User
