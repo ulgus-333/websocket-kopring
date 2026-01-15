@@ -9,7 +9,7 @@ data class UserDetailResponseDto(
     val idx: Long,
     val email: String,
     val name: String,
-    val nickname: String?,
+    val nickName: String?,
     val imageUrl: String?,
     val gender: Gender,
     val birth: LocalDate?
@@ -20,7 +20,7 @@ data class UserDetailResponseDto(
                 idx = user.idx!!,
                 email = user.email,
                 name = CipherUtils.decrypt(user.name),
-                nickname = user.nickname,
+                nickName = user.nickname,
                 imageUrl = user.imageUrl,
                 gender = user.gender,
                 birth = user.birth

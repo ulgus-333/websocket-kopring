@@ -82,6 +82,12 @@ class User private constructor(
         }
     }
 
+    fun update(nickname: String?, imageUrl: String?) {
+        this.nickname = nickname
+        imageUrl?.let { this.imageUrl = imageUrl }
+            ?:let { this.nickname = DEFAULT_PROFILE }
+    }
+
     fun role(): String {
         return role.role
     }
