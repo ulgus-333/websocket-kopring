@@ -7,6 +7,7 @@ import com.practice.socket.domain.presentation.response.user.UserDetailResponseD
 import com.practice.socket.domain.presentation.response.user.UserDetailsResponseDto
 import com.practice.socket.repository.user.UserCustomRepository
 import com.practice.socket.repository.user.UserRepository
+import com.practice.socket.service.common.FileService
 import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
@@ -17,7 +18,8 @@ import org.springframework.web.client.HttpClientErrorException
 @Service
 class UserService (
     private val userRepository: UserRepository,
-    private val userCustomRepository: UserCustomRepository
+    private val userCustomRepository: UserCustomRepository,
+    private val fileService: FileService
 ) {
     @Transactional(readOnly = true)
     fun findUserDetail(requestUser: CustomOAuth2User): UserDetailResponseDto? {
