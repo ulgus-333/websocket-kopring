@@ -10,18 +10,28 @@ data class UserDetailResponseDto(
     val email: String,
     val name: String,
     val nickName: String?,
-    val imageUrl: String?,
+    val profileImage: String?,
     val gender: Gender,
     val birth: LocalDate?
 ) {
     companion object {
-        fun from(user: User): UserDetailResponseDto {
+        fun from(user: User): UserDetailResponseDto = UserDetailResponseDto(
+            idx = user.idx!!,
+            email = user.email,
+            name = CipherUtils.decrypt(user.name),
+            nickName = user.nickname,
+            profileImage = user.imageUrl,
+            gender = user.gender,
+            birth = user.birth
+        )
+
+        fun from(user: User, imageUrl: String): UserDetailResponseDto {
             return UserDetailResponseDto(
                 idx = user.idx!!,
                 email = user.email,
                 name = CipherUtils.decrypt(user.name),
                 nickName = user.nickname,
-                imageUrl = user.imageUrl,
+                profileImage = imageUrl,
                 gender = user.gender,
                 birth = user.birth
             )
