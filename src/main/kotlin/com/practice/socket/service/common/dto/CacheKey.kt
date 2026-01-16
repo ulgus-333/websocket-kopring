@@ -16,7 +16,7 @@ enum class CacheKey (
         if (parameterCount == 0) {
             return prefix.name + keyName
         }
-        require(parameterCount != keyParams.size) { "Invalid number of parameters" }
+        require(parameterCount == keyParams.size) { "Invalid number of parameters" }
 
         return prefix.name + String.format(keyName, *keyParams)
     }
