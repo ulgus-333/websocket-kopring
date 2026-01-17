@@ -6,7 +6,7 @@ import jakarta.persistence.*
 import org.hibernate.annotations.ColumnDefault
 import java.time.LocalDateTime
 
-@Table(name = "messages")
+@Table(name = "message")
 @Entity
 class Message private constructor (
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -11,7 +11,7 @@ data class Room (
     @Id
     var idx: Long? = null,
 
-    @Column(nullable = false, length = 50)
+    @Column(length = 50)
     var title: String?,
 
     @Column(nullable = false, columnDefinition = "datetime")
