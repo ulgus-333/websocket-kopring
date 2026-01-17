@@ -22,4 +22,20 @@ data class UserRoomRelation (
     @ColumnDefault(value = "0")
     @Column(nullable = false)
     var unreadMessageCount: Int
-)
+) {
+    fun roomIdx(): Long {
+        return this.room.idx!!
+    }
+
+    fun username(): String {
+        return this.user.decryptName()
+    }
+
+    fun increaseUnreadMessageCount() {
+        this.unreadMessageCount++
+    }
+
+    fun resetUnreadMessageCount() {
+        this.unreadMessageCount = 0
+    }
+}

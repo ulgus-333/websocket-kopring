@@ -1,6 +1,7 @@
 package com.practice.socket.domain.entity.user
 
 import com.practice.socket.domain.entity.type.Gender
+import com.practice.socket.domain.entity.type.OAuth2UserType
 import com.practice.socket.domain.entity.type.Role
 import com.practice.socket.util.CipherUtils
 import jakarta.persistence.*
@@ -17,6 +18,10 @@ class User private constructor(
 
     @Column(nullable = false, unique = true)
     val oAuth2Id: String,
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    val oAuthType: OAuth2UserType,
 
     @Column(nullable = false, length = 50, updatable = false)
     val email: String,
@@ -46,6 +51,7 @@ class User private constructor(
         fun google(oAuth2Id: String, email: String, name: String, imageUrl: String?): User
             = User(
                 oAuth2Id = oAuth2Id,
+                oAuthType = OAuth2UserType.GOOGLE,
                 email = email,
                 name = CipherUtils.encrypt(name),
                 imageUrl = imageUrl ?: DEFAULT_PROFILE,
@@ -57,6 +63,7 @@ class User private constructor(
             val birth: LocalDate? = birthYear?.let { y -> birthday ?.let { d -> LocalDate.parse("$y-$d")}}
             return User(
                 oAuth2Id = oAuth2Id,
+                oAuthType = OAuth2UserType.NAVER,
                 email = email,
                 name = CipherUtils.encrypt(name),
                 nickname = nickname,
@@ -71,6 +78,7 @@ class User private constructor(
             val birth: LocalDate? = birthYear?.let { y -> birthday?.let { d -> LocalDate.parse("$y$d", DateTimeFormatter.ofPattern("yyyyMMdd"))} }
             return User(
                 oAuth2Id = oAuth2Id,
+                oAuthType = OAuth2UserType.KAKAO,
                 email = email,
                 name = CipherUtils.encrypt(name),
                 nickname = nickname,
@@ -90,5 +98,9 @@ class User private constructor(
 
     fun role(): String {
         return role.role
+    }
+
+    fun decryptName(): String {
+        return CipherUtils.decrypt(this.name)
     }
 }
