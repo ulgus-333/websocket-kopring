@@ -18,5 +18,13 @@ data class Room (
     @ColumnDefault(value = "CURRENT_TIMESTAMP")
     val createAt: LocalDateTime = LocalDateTime.now(),
 
-    var lastMessagedAt: LocalDateTime
-)
+    var lastMessagedAt: LocalDateTime? = null
+) {
+    companion object {
+        fun insert(title: String?, createAt: LocalDateTime)
+            = Room(
+                title = title,
+                createAt = createAt,
+            )
+    }
+}

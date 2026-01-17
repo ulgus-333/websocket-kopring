@@ -21,4 +21,9 @@ class UserRoomRelationService (
         return UserRoomRelations.from(userRoomRelationRepository.findAllByRoomIdxIn(relations.roomIdxes()))
     }
 
+    @Transactional
+    fun insertAll(relations: List<UserRoomRelation>): List<UserRoomRelation> {
+        return userRoomRelationRepository.saveAll(relations)
+    }
+
 }

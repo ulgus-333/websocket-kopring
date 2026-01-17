@@ -23,6 +23,16 @@ data class UserRoomRelation (
     @Column(nullable = false)
     var unreadMessageCount: Int
 ) {
+    companion object {
+        fun insert(user: User, room: Room): UserRoomRelation {
+            return UserRoomRelation(
+                user = user,
+                room = room,
+                unreadMessageCount = 0
+            )
+        }
+    }
+
     fun roomIdx(): Long {
         return this.room.idx!!
     }
