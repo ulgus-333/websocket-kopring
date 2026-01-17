@@ -1,14 +1,23 @@
 package com.practice.socket.service.chat
 
+import com.practice.socket.domain.entity.CustomOAuth2User
+import com.practice.socket.domain.entity.chat.Room
+import com.practice.socket.domain.entity.chat.UserRoomRelation
+import com.practice.socket.domain.entity.user.User
+import com.practice.socket.domain.presentation.request.chat.CreateChatRoomRequestDto
+import com.practice.socket.domain.presentation.response.chat.ChatRoomResponseDto
 import com.practice.socket.domain.presentation.response.chat.ChatRoomsResponseDto
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.util.stream.Stream
 
 @Transactional(readOnly = true)
 @Service
-class ChatAggregateService (
-    private val relationService: UserRoomRelationService
+class ChatAggregateService(
+    private val roomService: RoomService,
+    private val relationService: UserRoomRelationService,
+    private val userRoomRelationService: UserRoomRelationService
 ) {
     fun findRoomsByUserIdx(userIdx: Long, pageable: Pageable): ChatRoomsResponseDto {
         val pagedRelation = relationService.findPagedUserRoomRelationByUserIdx(userIdx, pageable)
@@ -21,5 +30,22 @@ class ChatAggregateService (
         val mapper = roomRelations.roomIdxUserNameMapper()
 
         return ChatRoomsResponseDto.of(pagedRelation, mapper)
+    }
+
+    @Transactional
+    fun createChatRoom(requestUser: CustomOAuth2User, targetUser: User, requestDto: CreateChatRoomRequestDto): ChatRoomResponseDto {
+        val newRoom = roomService.insert(Room.insert(requestDto.title, requestDto.requestDatetime))
+        val users = ArrayList<String>()
+        val relations = Stream.of(requestUser.user, targetUser)
+            .peek { users.add(it.decryptName()) }
+            .map { UserRoomRelation.insert(it, newRoom) }
+            .toList()
+
+        val myRelation = userRoomRelationService.insertAll(relations).stream()
+            .filter{ relation -> relation.user.idx == requestUser.userIdx() }
+            .findFirst()
+            .orElseThrow()
+
+        return ChatRoomResponseDto.of(myRelation, users)
     }
 }

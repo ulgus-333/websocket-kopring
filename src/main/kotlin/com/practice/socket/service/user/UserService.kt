@@ -1,6 +1,7 @@
 package com.practice.socket.service.user
 
 import com.practice.socket.domain.entity.CustomOAuth2User
+import com.practice.socket.domain.entity.user.User
 import com.practice.socket.domain.presentation.request.user.UserProfileUpdateRequestDto
 import com.practice.socket.domain.presentation.request.user.UserSearchRequestDto
 import com.practice.socket.domain.presentation.response.user.UserDetailResponseDto
@@ -13,11 +14,11 @@ import com.practice.socket.service.common.RedisService
 import com.practice.socket.service.common.dto.CacheKey
 import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
-import org.springframework.http.HttpStatusCode
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.client.HttpClientErrorException
 
+@Transactional(readOnly = true)
 @Service
 class UserService (
     private val userRepository: UserRepository,
@@ -25,10 +26,13 @@ class UserService (
     private val redisService: RedisService,
     private val fileService: FileService
 ) {
-    @Transactional(readOnly = true)
+    fun findUserByIdx(userIdx: Long): User {
+        return userRepository.findById(userIdx)
+            .orElseThrow { HttpClientErrorException(HttpStatus.valueOf(404), "NotFound User") }
+    }
+
     fun findUserDetail(requestUser: CustomOAuth2User): UserDetailResponseDto? {
-        val user = userRepository.findById(requestUser.userIdx())
-            .orElseThrow{ HttpClientErrorException(HttpStatusCode.valueOf(404), "NotFound User") }
+        val user = findUserByIdx(requestUser.userIdx())
         return user.imageUrl?.let { url ->
             if (url.startsWith("http")) {
                 return UserDetailResponseDto.from(user, url)
@@ -47,7 +51,6 @@ class UserService (
             }
     }
 
-    @Transactional(readOnly = true)
     fun searchUsers(requestUser: CustomOAuth2User, requestDto: UserSearchRequestDto, pageable: Pageable): UserDetailsResponseDto {
         val searchDao = requestDto.toDao(requestUser.userIdx(), pageable)
         val users = userCustomRepository.findUsersBySearchDao(searchDao)
@@ -57,8 +60,7 @@ class UserService (
 
     @Transactional
     fun updateUserProfile(requestUser: CustomOAuth2User, requestDto: UserProfileUpdateRequestDto) {
-        val user = userRepository.findById(requestUser.userIdx())
-            .orElseThrow { HttpClientErrorException(HttpStatus.valueOf(404), "NotFound User") }
+        val user = findUserByIdx(requestUser.userIdx())
 
         if (user.imageUrl.isNullOrBlank()
             && !user.imageUrl.equals(requestDto.profileImageUrl)
