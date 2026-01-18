@@ -4,8 +4,10 @@ import com.practice.socket.domain.entity.chat.UserRoomRelation
 import com.practice.socket.repository.chat.UserRoomRelationRepository
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.client.HttpClientErrorException
 
 @Transactional(readOnly = true)
 @Service
@@ -28,5 +30,10 @@ class UserRoomRelationService (
 
     fun findUserRoomRelationByRoomIdx(roomIdx: Long): UserRoomRelations {
         return UserRoomRelations.from(userRoomRelationRepository.findAllByRoomIdx(roomIdx))
+    }
+
+    fun findUserRoomRelationByRoomIdxAndUserIdx(roomIdx: Long, userIdx: Long): UserRoomRelation {
+        return userRoomRelationRepository.findByRoomIdxAndUserIdx(roomIdx, userIdx)
+            ?: throw HttpClientErrorException(HttpStatus.NOT_FOUND)
     }
 }

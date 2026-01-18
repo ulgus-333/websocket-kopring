@@ -8,6 +8,7 @@ import com.practice.socket.domain.presentation.response.chat.MessagesResponseDto
 import com.practice.socket.service.chat.ChatAggregateService
 import com.practice.socket.service.user.UserService
 import jakarta.validation.Valid
+import jakarta.validation.constraints.NotNull
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.web.PageableDefault
@@ -46,5 +47,14 @@ class ChatController (
     ): ResponseEntity<MessagesResponseDto> {
 
         return ResponseEntity.ok(chatService.getRoomMessages(requestUser, roomIdx, pageable))
+    }
+
+    @PatchMapping("/{roomIdx}")
+    fun resetUnreadCount(@AuthenticationPrincipal requestUser: CustomOAuth2User,
+                         @PathVariable @NotNull roomIdx: Long): ResponseEntity<Void> {
+
+        chatService.resetUnreadCount(requestUser, roomIdx)
+
+        return ResponseEntity.ok().build()
     }
 }
