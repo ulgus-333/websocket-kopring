@@ -62,4 +62,9 @@ class ChatAggregateService(
         val messages = messageService.findMessagesByRoomIdx(roomIdx, pageable)
         return MessagesResponseDto.from(messages)
     }
+
+    fun resetUnreadCount(requestUser: CustomOAuth2User, roomIdx: Long) {
+        relationService.findUserRoomRelationByRoomIdxAndUserIdx(roomIdx, requestUser.userIdx())
+            .resetUnreadMessageCount()
+    }
 }
