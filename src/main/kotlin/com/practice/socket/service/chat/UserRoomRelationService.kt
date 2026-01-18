@@ -26,4 +26,7 @@ class UserRoomRelationService (
         return userRoomRelationRepository.saveAll(relations)
     }
 
+    fun findUserRoomRelationByRoomIdx(roomIdx: Long): UserRoomRelations {
+        return UserRoomRelations.from(userRoomRelationRepository.findAllByRoomIdx(roomIdx))
+    }
 }
