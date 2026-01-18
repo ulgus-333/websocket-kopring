@@ -1,4 +1,4 @@
-let stompClient = null;
+let websocket = null;
 let userIdx = null;
 let userNickname = null;
 let currentRoomIdx = null;
@@ -214,40 +214,45 @@ function addRoomToList(room, roomListContainer) {
 
 
 function connectToRoom(roomIdx, roomName) {
-    if (stompClient) {
-        stompClient.deactivate();
+    if (websocket) {
+        websocket.close();
     }
     $("#messages").empty();
 
-    stompClient = new StompJs.Client({
-        brokerURL: 'ws://' + window.location.host + '/stomp/chats',
-        onConnect: (frame) => {
-            console.log('Connected: ' + frame);
-            currentRoomIdx = roomIdx;
-            $("#chatRoomName").text(roomName);
+    const url = 'ws://' + window.location.host + '/ws/chats/' + roomIdx;
+    websocket = new WebSocket(url);
 
-            // Subscribe to the chat room
-            stompClient.subscribe('/sub/chats/' + currentRoomIdx, (message) => {
-                showMessage(JSON.parse(message.body));
-            });
+    websocket.onopen = function(event) {
+        console.log('Connected to WebSocket: ', event);
+        currentRoomIdx = roomIdx;
+        $("#chatRoomName").text(roomName);
 
-            // Fetch previous messages
-            fetchPreviousMessages(currentRoomIdx);
+        // Fetch previous messages
+        fetchPreviousMessages(currentRoomIdx);
 
-            // Reset unread message count
-            resetUnreadCount(currentRoomIdx);
+        // Reset unread message count
+        resetUnreadCount(currentRoomIdx);
 
-            $("#roomListColumn").removeClass("col-md-12").addClass("col-md-3");
-            $("#chatAreaColumn").show();
-            $("#backToInitialView").show();
-        },
-        onStompError: (frame) => {
-            console.error('Broker reported error: ' + frame.headers['message']);
-            console.error('Additional details: ' + frame.body);
-        }
-    });
+        $("#roomListColumn").removeClass("col-md-12").addClass("col-md-3");
+        $("#chatAreaColumn").show();
+        $("#backToInitialView").show();
+    };
 
-    stompClient.activate();
+    websocket.onmessage = function(event) {
+        console.log('Received message: ', event.data);
+        const message = JSON.parse(event.data);
+        showMessage(message);
+    };
+
+    websocket.onerror = function(error) {
+        console.error('WebSocket Error: ', error);
+        alert('WebSocket connection error. See console for details.');
+    };
+
+    websocket.onclose = function(event) {
+        console.log('WebSocket Disconnected: ', event);
+        // Additional cleanup if needed
+    };
 }
 
 function resetUnreadCount(roomIdx) {
@@ -290,10 +295,10 @@ function fetchPreviousMessages(roomIdx) {
 }
 
 function disconnect() {
-    if (stompClient !== null) {
-        stompClient.deactivate();
+    if (websocket !== null) {
+        websocket.close();
     }
-    stompClient = null;
+    websocket = null;
     currentRoomIdx = null;
     console.log("Disconnected");
 }
@@ -307,22 +312,22 @@ function backToInitialView() {
 
 function sendMessage() {
     const messageContent = $("#message").val();
-    if (messageContent && stompClient && currentRoomIdx) {
+    if (messageContent && websocket && currentRoomIdx) {
         const chatMessage = {
-            type: 'TEXT',
-            message: messageContent
+            type: 'TEXT', // Assuming 'TEXT' is the type expected by the backend
+            message: messageContent,
+            roomIdx: currentRoomIdx, // Include roomIdx for backend routing/context
+            senderIdx: userIdx, // Include senderIdx if the backend needs it
+            senderNickname: userNickname // Include senderNickname if the backend needs it
         };
-        stompClient.publish({
-            destination: "/pub/chats/" + currentRoomIdx,
-            body: JSON.stringify(chatMessage)
-        });
+        websocket.send(JSON.stringify(chatMessage));
         $("#message").val("");
     }
 }
 
 function showMessage(message) {
     const messagesContainer = $("#messages");
-    const isMyMessage = message.user && message.user.idx === userIdx;
+    const isMyMessage = message.senderIdx === userIdx;
 
     const alignment = isMyMessage ? 'right' : 'left';
 
@@ -332,7 +337,7 @@ function showMessage(message) {
     const msg = $("<div>").text(message.message || '');
 
     if (!isMyMessage) {
-        sender.text(message.user.nickName || message.user.name || 'Unknown');
+        sender.text(message.senderNickname || 'Unknown');
         bubble.append(sender);
     }
 

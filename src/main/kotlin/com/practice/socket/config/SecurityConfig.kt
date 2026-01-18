@@ -14,7 +14,7 @@ class SecurityConfig (
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
         return http
             .authorizeHttpRequests { request -> request
-                .requestMatchers("/login", "/oauth2/**", "/error", "/main.css", "/stomp.js", "/mypage.js").permitAll()
+                .requestMatchers("/login", "/oauth2/**", "/error", "/main.css", "/websocket.js", "/mypage.js").permitAll()
                 .anyRequest().authenticated()
             }
             .oauth2Login { oauth -> oauth
