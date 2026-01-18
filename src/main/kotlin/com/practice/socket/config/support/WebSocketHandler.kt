@@ -31,12 +31,8 @@ class WebSocketHandler: TextWebSocketHandler() {
     override fun handleMessage(session: WebSocketSession, message: WebSocketMessage<*>) {
         logger.info("{} send message: {}", session.id, message.payload)
 
-        webSocketSessionMap.values.forEach {
-            try {
-                it.sendMessage(message)
-            } catch (e: Exception) {
-                throw RuntimeException(e)
-            }
-        }
+        webSocketSessionMap.values
+            .filter { it.uri == session.uri }
+            .forEach { it.sendMessage(message) }
     }
 }
