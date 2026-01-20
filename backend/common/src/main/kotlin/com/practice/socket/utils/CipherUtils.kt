@@ -1,10 +1,10 @@
-package com.practice.socket.util
+package com.practice.socket.utils
 
-import com.practice.socket.config.properties.CipherProperties
+import com.practice.socket.config.CipherProperties
 import java.nio.charset.StandardCharsets
+import java.security.MessageDigest
 import javax.crypto.Cipher
 import javax.crypto.spec.SecretKeySpec
-import java.security.MessageDigest
 
 object CipherUtils {
     fun encrypt(plainText: String): String {

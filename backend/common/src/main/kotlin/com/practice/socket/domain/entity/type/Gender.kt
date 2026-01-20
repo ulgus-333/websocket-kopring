@@ -1,7 +1,6 @@
 package com.practice.socket.domain.entity.type
 
 import com.mysema.commons.lang.Assert
-import java.lang.IllegalArgumentException
 
 enum class Gender (
     val value: String

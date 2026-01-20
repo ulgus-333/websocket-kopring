@@ -1,7 +1,7 @@
 package com.practice.socket.domain.dao
 
 import com.practice.socket.domain.entity.user.QUser.user
-import com.practice.socket.util.CipherUtils
+import com.practice.socket.utils.CipherUtils
 import com.querydsl.core.BooleanBuilder
 import org.springframework.data.domain.Pageable
 
