@@ -8,7 +8,7 @@ import com.oracle.bmc.objectstorage.requests.DeleteObjectRequest
 import com.oracle.bmc.objectstorage.requests.DeletePreauthenticatedRequestRequest
 import com.oracle.bmc.objectstorage.responses.CreatePreauthenticatedRequestResponse
 import com.practice.socket.config.properties.OciProperties
-import com.practice.socket.domain.entity.CustomOAuth2User
+import com.practice.socket.domain.dto.CustomOAuth2User
 import com.practice.socket.domain.presentation.request.file.PARRequestDto
 import com.practice.socket.domain.presentation.response.file.FileResponseDto
 import com.practice.socket.service.common.dto.CacheKey

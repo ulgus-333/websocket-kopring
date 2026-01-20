@@ -1,6 +1,6 @@
 package com.practice.socket.controller.user
 
-import com.practice.socket.domain.entity.CustomOAuth2User
+import com.practice.socket.domain.dto.CustomOAuth2User
 import com.practice.socket.domain.presentation.request.user.UserProfileUpdateRequestDto
 import com.practice.socket.domain.presentation.request.user.UserSearchRequestDto
 import com.practice.socket.domain.presentation.response.user.UserDetailResponseDto
