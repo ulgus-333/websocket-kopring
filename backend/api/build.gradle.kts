@@ -1,18 +1,11 @@
 plugins {
     id("org.springframework.boot")
-    id("org.jetbrains.kotlin.kapt")
-    id("org.jetbrains.kotlin.plugin.jpa")
+    id("org.jetbrains.kotlin.plugin.spring")
 }
 
 dependencies {
 
     implementation(project(":backend:common"))
-
-    implementation("com.querydsl:querydsl-jpa:5.1.0:jakarta")
-
-    kapt("com.querydsl:querydsl-apt:5.1.0:jakarta")
-    kapt("jakarta.annotation:jakarta.annotation-api")
-    kapt("jakarta.persistence:jakarta.persistence-api")
 
     // spring
     implementation("org.springframework.boot:spring-boot-starter-web")
@@ -31,14 +24,4 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-}
-
-val querydslDir = layout.buildDirectory.dir("generated/source/kapt/main")
-
-sourceSets {
-    main {
-        java {
-            srcDir(querydslDir)
-        }
-    }
 }

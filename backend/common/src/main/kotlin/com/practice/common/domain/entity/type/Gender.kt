@@ -1,6 +1,6 @@
 package com.practice.common.domain.entity.type
 
-import com.mysema.commons.lang.Assert
+import org.springframework.util.Assert
 
 enum class Gender (
     val value: String
