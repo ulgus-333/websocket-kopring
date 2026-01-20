@@ -1,6 +1,6 @@
 package com.practice.socket.controller.common
 
-import com.practice.socket.domain.entity.CustomOAuth2User
+import com.practice.socket.domain.dto.CustomOAuth2User
 import com.practice.socket.domain.presentation.request.file.PARRequestDto
 import com.practice.socket.domain.presentation.response.file.FileResponseDto
 import com.practice.socket.service.common.FileService

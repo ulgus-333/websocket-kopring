@@ -1,6 +1,6 @@
 package com.practice.socket.service.chat
 
-import com.practice.socket.domain.entity.CustomOAuth2User
+import com.practice.socket.domain.dto.CustomOAuth2User
 import com.practice.socket.domain.entity.chat.Room
 import com.practice.socket.domain.entity.chat.UserRoomRelation
 import com.practice.socket.domain.entity.user.User

@@ -1,4 +1,4 @@
-package com.practice.socket.domain.entity
+package com.practice.socket.domain.dto
 
 import com.practice.socket.domain.entity.user.User
 import org.springframework.security.core.GrantedAuthority
