@@ -63,8 +63,6 @@ redis:
     connection: 3000
     command: 3000
     shutdown: 1000
-cipher:
-  seed: ${CIPHER_SEED}
 oci:
   namespace: ${OCI_NAMESPACE}
   region: ap-chuncheon-1

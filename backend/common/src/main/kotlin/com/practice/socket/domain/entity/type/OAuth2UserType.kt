@@ -1,7 +1,7 @@
 package com.practice.socket.domain.entity.type
 
 import com.practice.socket.domain.entity.user.User
-import com.practice.socket.util.UserFactory
+import com.practice.socket.utils.UserFactory
 import org.springframework.util.Assert
 
 enum class OAuth2UserType (

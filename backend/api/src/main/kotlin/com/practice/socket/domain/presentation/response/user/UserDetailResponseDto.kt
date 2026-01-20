@@ -2,7 +2,7 @@ package com.practice.socket.domain.presentation.response.user
 
 import com.practice.socket.domain.entity.type.Gender
 import com.practice.socket.domain.entity.user.User
-import com.practice.socket.util.CipherUtils
+import com.practice.socket.utils.CipherUtils
 import java.time.LocalDate
 
 data class UserDetailResponseDto(

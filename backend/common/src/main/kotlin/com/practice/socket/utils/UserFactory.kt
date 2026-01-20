@@ -1,4 +1,4 @@
-package com.practice.socket.util
+package com.practice.socket.utils
 
 import com.practice.socket.domain.entity.type.OAuth2UserType
 import com.practice.socket.domain.entity.user.User
