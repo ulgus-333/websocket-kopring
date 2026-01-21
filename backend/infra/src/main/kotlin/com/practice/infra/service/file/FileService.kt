@@ -1,4 +1,4 @@
-package com.practice.api.service.common
+package com.practice.infra.service.file
 
 import com.oracle.bmc.objectstorage.ObjectStorage
 import com.oracle.bmc.objectstorage.model.CreatePreauthenticatedRequestDetails
@@ -7,12 +7,12 @@ import com.oracle.bmc.objectstorage.requests.CreatePreauthenticatedRequestReques
 import com.oracle.bmc.objectstorage.requests.DeleteObjectRequest
 import com.oracle.bmc.objectstorage.requests.DeletePreauthenticatedRequestRequest
 import com.oracle.bmc.objectstorage.responses.CreatePreauthenticatedRequestResponse
-import com.practice.api.config.properties.OciProperties
-import com.practice.api.domain.dto.CustomOAuth2User
-import com.practice.api.domain.presentation.request.file.PARRequestDto
-import com.practice.api.domain.presentation.response.file.FileResponseDto
-import com.practice.api.service.common.dto.CacheKey
-import com.practice.api.service.common.dto.PARCacheDto
+import com.practice.infra.config.properties.OciProperties
+import com.practice.infra.domain.dto.CacheKey
+import com.practice.infra.domain.dto.PARCacheDto
+import com.practice.infra.domain.dto.ParPathDto
+import com.practice.infra.domain.type.FilePathType
+import com.practice.infra.service.cache.RedisService
 import org.springframework.stereotype.Service
 import java.time.Instant
 import java.util.*
@@ -28,44 +28,46 @@ class FileService (
         private const val WRITE_ACCESS_TYPE = "ObjectWrite"
     }
 
-    fun generateParWriteUrl(requestUser: CustomOAuth2User, requestDto: PARRequestDto): FileResponseDto {
+    fun generateParWriteUrl(pathType: FilePathType, fileName: String, cacheKey: String, vararg pathArgs: String?): ParPathDto {
         val expireAt = Date.from(Instant.now().plus(OciProperties.WRITE_EXPIRE_DURATION))
-        val filePath = requestDto.generateFilePath(requestUser.userIdx().toString())
+        val filePath = pathType.generateFilePath(pathArgs.toString()) + fileName
 
-        val response = generatePar(filePath, WRITE_ACCESS_TYPE, expireAt)
+        val writeUrl = generateParUrl(filePath, WRITE_ACCESS_TYPE, expireAt)
 
-        val parUrl = ociProperties.preAuthenticatedRequestUrl(response.preauthenticatedRequest.accessUri)
+        val parIdCacheKey = CacheKey.OCI_PAR_KEY.generateKey(pathType.name, cacheKey, fileName)
+        redisService.set(parIdCacheKey, PARCacheDto.from(writeUrl.preauthenticatedRequest), CacheKey.OCI_PAR_KEY.expire())
 
-        val cacheKey = CacheKey.OCI_PAR_KEY.generateKey(requestDto.pathType.name, requestUser.userIdx().toString())
-        redisService.set(cacheKey, PARCacheDto.from(response.preauthenticatedRequest), CacheKey.OCI_PAR_KEY.expire())
-
-        return FileResponseDto(
-            parUrl = parUrl,
+        return ParPathDto(
+            parUrl = ociProperties.preAuthenticatedRequestUrl(writeUrl.preauthenticatedRequest.accessUri),
             filePath = filePath,
-            fileName = requestDto.filename
+            fileName = fileName
         )
     }
 
-    fun generateParReadUrl(filePath: String): String {
+    fun generateParReadUrl(filePath: String): ParPathDto {
         val expireAt = Date.from(Instant.now().plus(OciProperties.READ_EXPIRE_DURATION))
-        val response = generatePar(filePath, READ_ACCESS_TYPE, expireAt)
 
-        return ociProperties.preAuthenticatedRequestUrl(response.preauthenticatedRequest.accessUri)
+        val readUrl = generateParUrl(filePath, READ_ACCESS_TYPE, expireAt)
+
+        return ParPathDto(
+            parUrl = ociProperties.preAuthenticatedRequestUrl(readUrl.preauthenticatedRequest.accessUri),
+            filePath = filePath,
+            fileName = filePath.substringAfterLast("/")
+        )
     }
 
-    fun expireRemainPAR(requestUser: CustomOAuth2User, requestDto: PARRequestDto) {
-        val cacheKey = CacheKey.OCI_PAR_KEY.generateKey(requestDto.pathType.name, requestUser.userIdx().toString())
+    fun expireRemainPar(pathType: FilePathType, fileName: String, cacheKey: String) {
+        val parIdCacheKey = CacheKey.OCI_PAR_KEY.generateKey(pathType.name, cacheKey, fileName)
 
         redisService.get(cacheKey, PARCacheDto::class.java)
             ?.let {
                 val request = DeletePreauthenticatedRequestRequest.builder()
-                    .bucketName(ociProperties.bucket)
                     .namespaceName(ociProperties.namespace)
+                    .bucketName(ociProperties.bucket)
                     .parId(it.parRequestId)
                     .build()
-
                 objectStorage.deletePreauthenticatedRequest(request)
-                redisService.delete(cacheKey)
+                redisService.delete(parIdCacheKey)
             }
     }
 
@@ -75,14 +77,15 @@ class FileService (
             .bucketName(ociProperties.bucket)
             .objectName(filePath)
             .build()
+
         objectStorage.deleteObject(request)
     }
 
-    private fun generatePar(filePath: String, accessType: String, expireAt: Date): CreatePreauthenticatedRequestResponse {
+    private fun generateParUrl(filePath: String, accessType: String, expireAt: Date): CreatePreauthenticatedRequestResponse {
         val details = CreatePreauthenticatedRequestDetails.builder()
             .name("par-" + UUID.randomUUID())
             .objectName(filePath)
-            .accessType(AccessType.valueOf(accessType))
+            .accessType(AccessType.create(accessType))
             .timeExpires(expireAt)
             .build()
 

@@ -1,13 +1,18 @@
 package com.practice.common.config
 
+import jakarta.annotation.PostConstruct
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.context.annotation.Configuration
+import org.springframework.stereotype.Component
 
-@Configuration
-class CipherProperties {
+@Component
+class CipherProperties(
     @Value("\${cipher.seed}")
-    fun setSeed(value: String) {
-        seed = value
+    private val seedValue: String
+) {
+
+    @PostConstruct
+    fun init() {
+        seed = seedValue
     }
 
     companion object {

@@ -1,4 +1,4 @@
-package com.practice.api.service.common
+package com.practice.infra.service.cache
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory

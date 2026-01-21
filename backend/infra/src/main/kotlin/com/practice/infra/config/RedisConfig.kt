@@ -1,7 +1,7 @@
-package com.practice.api.config
+package com.practice.infra.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.practice.api.config.properties.RedisConnectionProperties
+import com.practice.infra.config.properties.RedisConnectionProperties
 import io.lettuce.core.ClientOptions
 import io.lettuce.core.SocketOptions
 import org.springframework.cache.annotation.EnableCaching

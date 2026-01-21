@@ -6,6 +6,7 @@ plugins {
 dependencies {
 
     implementation(project(":backend:common"))
+    implementation(project(":backend:infra"))
 
     // spring
     implementation("org.springframework.boot:spring-boot-starter-web")
@@ -15,10 +16,6 @@ dependencies {
 
     // Database
     runtimeOnly("com.mysql:mysql-connector-j")
-
-    // Oracle
-    implementation("com.oracle.oci.sdk:oci-java-sdk-objectstorage:3.77.0")
-    implementation("com.oracle.oci.sdk:oci-java-sdk-common-httpclient-jersey3:3.77.0")
 
     // test
     testImplementation("org.springframework.boot:spring-boot-starter-test")
