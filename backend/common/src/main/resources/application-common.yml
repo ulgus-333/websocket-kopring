@@ -1,2 +1,0 @@
-cipher:
-  seed: ${CIPHER_SEED}
