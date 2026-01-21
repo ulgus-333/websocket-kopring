@@ -1,4 +1,4 @@
-package com.practice.api.service.common.dto
+package com.practice.infra.domain.dto
 
 import com.oracle.bmc.objectstorage.model.PreauthenticatedRequest
 

@@ -13,7 +13,6 @@ dependencies {
     api("org.jetbrains.kotlin:kotlin-reflect")
 
     api("org.springframework.boot:spring-boot-starter-validation")
-    api("org.springframework.boot:spring-boot-starter-data-redis")
     api("org.springframework.boot:spring-boot-starter-data-jpa")
 
     api("com.querydsl:querydsl-jpa:5.1.0:jakarta")

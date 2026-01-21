@@ -1,4 +1,4 @@
-package com.practice.api.config
+package com.practice.infra.config
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper

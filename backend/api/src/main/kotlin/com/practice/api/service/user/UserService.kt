@@ -5,13 +5,13 @@ import com.practice.api.domain.presentation.request.user.UserProfileUpdateReques
 import com.practice.api.domain.presentation.request.user.UserSearchRequestDto
 import com.practice.api.domain.presentation.response.user.UserDetailResponseDto
 import com.practice.api.domain.presentation.response.user.UserDetailsResponseDto
-import com.practice.api.domain.presentation.type.FilePathType
+import com.practice.api.domain.presentation.type.FilePathRequestType
 import com.practice.api.repository.user.UserCustomRepository
-import com.practice.api.service.common.FileService
-import com.practice.api.service.common.RedisService
-import com.practice.api.service.common.dto.CacheKey
+import com.practice.infra.domain.dto.CacheKey
 import com.practice.common.domain.entity.user.User
 import com.practice.common.repository.user.UserRepository
+import com.practice.infra.service.cache.RedisService
+import com.practice.infra.service.file.FileService
 import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -42,12 +42,12 @@ class UserService (
     }
 
     private fun profileImageParUrl(userIdx: Long, filePath: String): String {
-        val cacheKey = CacheKey.OCI_USER_READ_KEY.generateKey(userIdx.toString(), FilePathType.PROFILE.name)
+        val cacheKey = CacheKey.OCI_USER_READ_KEY.generateKey(userIdx.toString(), FilePathRequestType.PROFILE.name)
         return redisService.get(cacheKey, String::class.java)
             ?:let {
                 val generateParReadUrl = fileService.generateParReadUrl(filePath)
                 redisService.set(cacheKey, generateParReadUrl, CacheKey.OCI_USER_READ_KEY.expire())
-                return generateParReadUrl
+                return generateParReadUrl.parUrl
             }
     }
 
@@ -65,7 +65,7 @@ class UserService (
         if (user.imageUrl.isNullOrBlank()
             && !user.imageUrl.equals(requestDto.profileImageUrl)
             && user.imageUrl?.startsWith("http") == false) {
-            val cacheKey = CacheKey.OCI_USER_READ_KEY.generateKey(requestUser.userIdx().toString(), FilePathType.PROFILE.name)
+            val cacheKey = CacheKey.OCI_USER_READ_KEY.generateKey(requestUser.userIdx().toString(), FilePathRequestType.PROFILE.name)
             redisService.delete(cacheKey)
             fileService.deleteFile(user.imageUrl!!)
         }

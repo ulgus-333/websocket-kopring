@@ -1,0 +1,11 @@
+redis:
+  host: 127.0.0.1
+  port: 6379
+  timeout: # ms
+    connection: 3000
+    command: 3000
+    shutdown: 1000
+oci:
+  namespace: ${OCI_NAMESPACE}
+  region: ap-chuncheon-1
+  bucket: chat-socket
