@@ -1,0 +1,11 @@
+package com.practice.socket
+
+import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.runApplication
+
+@SpringBootApplication(scanBasePackages = ["com.practice.common", "com.practice.infra", "com.practice.socket"])
+class SocketApplication
+
+fun main(args: Array<String>) {
+    runApplication<SocketApplication>(*args)
+}
