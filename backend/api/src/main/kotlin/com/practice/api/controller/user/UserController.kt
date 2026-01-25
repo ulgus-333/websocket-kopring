@@ -37,7 +37,6 @@ class UserController (
     fun updateProfile(@AuthenticationPrincipal requestUser: CustomOAuth2User,
                       @RequestBody @Valid requestDto: UserProfileUpdateRequestDto
     ): ResponseEntity<Void> {
-
         userService.updateUserProfile(requestUser, requestDto)
         return ResponseEntity.ok().build()
     }

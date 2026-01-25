@@ -1,4 +1,4 @@
-package com.practice.api.domain.presentation.type
+package com.practice.socket.domain.presentation.response
 
 import com.practice.common.domain.entity.type.MessageType
 

@@ -22,7 +22,8 @@ class FileController (
         val parPathDto = fileService.generateParWriteUrl(
             requestDto.pathType.convert(),
             requestDto.filename,
-            requestUser.userIdx().toString()
+            requestUser.userIdx().toString(),
+            requestDto.variables
         )
 
         return ResponseEntity.ok(FileResponseDto.from(parPathDto))

@@ -10,6 +10,7 @@ import com.practice.api.repository.user.UserCustomRepository
 import com.practice.infra.domain.dto.CacheKey
 import com.practice.common.domain.entity.user.User
 import com.practice.common.repository.user.UserRepository
+import com.practice.infra.domain.dto.ParPathDto
 import com.practice.infra.service.cache.RedisService
 import com.practice.infra.service.file.FileService
 import org.springframework.data.domain.Pageable
@@ -43,7 +44,7 @@ class UserService (
 
     private fun profileImageParUrl(userIdx: Long, filePath: String): String {
         val cacheKey = CacheKey.OCI_USER_READ_KEY.generateKey(userIdx.toString(), FilePathRequestType.PROFILE.name)
-        return redisService.get(cacheKey, String::class.java)
+        return redisService.get(cacheKey, ParPathDto::class.java)?.parUrl
             ?:let {
                 val generateParReadUrl = fileService.generateParReadUrl(filePath)
                 redisService.set(cacheKey, generateParReadUrl, CacheKey.OCI_USER_READ_KEY.expire())
@@ -62,9 +63,7 @@ class UserService (
     fun updateUserProfile(requestUser: CustomOAuth2User, requestDto: UserProfileUpdateRequestDto) {
         val user = findUserByIdx(requestUser.userIdx())
 
-        if (user.imageUrl.isNullOrBlank()
-            && !user.imageUrl.equals(requestDto.profileImageUrl)
-            && user.imageUrl?.startsWith("http") == false) {
+        if (user.validateUpdatableProfileImg(requestDto.profileImageUrl)) {
             val cacheKey = CacheKey.OCI_USER_READ_KEY.generateKey(requestUser.userIdx().toString(), FilePathRequestType.PROFILE.name)
             redisService.delete(cacheKey)
             fileService.deleteFile(user.imageUrl!!)

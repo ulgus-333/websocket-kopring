@@ -1,7 +1,5 @@
-package com.practice.api.domain.presentation.response.chat
+package com.practice.socket.domain.presentation.response
 
-import com.practice.api.domain.presentation.response.user.UserDetailResponseDto
-import com.practice.api.domain.presentation.type.MessageResponseType
 import com.practice.common.domain.entity.chat.Message
 import java.time.LocalDateTime
 

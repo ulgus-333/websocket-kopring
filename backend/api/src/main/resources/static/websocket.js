@@ -34,6 +34,13 @@ $(document).ready(function() {
     });
     $("#myPageBtn").on("click", () => { window.location.href = "/mypage.html"; });
 
+    $("#attachFileBtn").on("click", () => {
+        $("#fileInput").click();
+    });
+
+    $("#fileInput").on("change", handleFileSelect);
+
+
     // Modal-related event listeners
     $("#user-search-btn").on("click", searchUsers);
     $("#back-to-search-btn").on("click", backToSearchStep);
@@ -57,6 +64,71 @@ $(document).ready(function() {
         connectToRoom(roomIdx, roomName);
     });
 });
+
+async function handleFileSelect(event) {
+    const file = event.target.files[0];
+    if (!file || !currentRoomIdx) {
+        return;
+    }
+
+    // 1. Get Presigned URL from our backend
+    const parRequest = {
+        pathType: 'CHAT_ATTACHMENT',
+        filename: file.name,
+        variables: [currentRoomIdx, userIdx] // Pass room index as a variable
+    };
+
+    let parResponse;
+    try {
+        const response = await fetch('/files/presigned', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(parRequest)
+        });
+        if (!response.ok) {
+            throw new Error('Failed to get pre-signed URL.');
+        }
+        parResponse = await response.json();
+    } catch (error) {
+        console.error(error);
+        alert('Error preparing file for upload.');
+        return;
+    }
+
+    // 2. Upload the file to OCI using the PAR
+    try {
+        const uploadResponse = await fetch(parResponse.parUrl, {
+            method: 'PUT',
+            headers: { 'Content-Type': file.type },
+            body: file
+        });
+        if (!uploadResponse.ok) {
+            throw new Error('File upload failed.');
+        }
+    } catch (error) {
+        console.error(error);
+        alert('Error uploading file.');
+        return;
+    }
+
+    // 3. Send WebSocket message
+    const messageType = file.type.startsWith('image/') ? 'IMAGE' : 'FILE';
+    const chatMessage = {
+        type: messageType,
+        message: parResponse.filePath, // Send the file path, not the content
+        roomIdx: currentRoomIdx,
+        userIdx: userIdx,
+        senderNickname: userNickname,
+        createAt: getLocalDateTimeString()
+    };
+
+    if (websocket) {
+        websocket.send(JSON.stringify(chatMessage));
+    }
+
+    // Reset file input to allow selecting the same file again
+    $(event.target).val('');
+}
 
 function createRoom() {
     // Show the modal and reset it
@@ -318,8 +390,9 @@ function sendMessage() {
             type: 'TEXT', // Assuming 'TEXT' is the type expected by the backend
             message: messageContent,
             roomIdx: currentRoomIdx, // Include roomIdx for backend routing/context
-            senderIdx: userIdx, // Include senderIdx if the backend needs it
-            senderNickname: userNickname // Include senderNickname if the backend needs it
+            userIdx: userIdx, // Include senderIdx if the backend needs it
+            senderNickname: userNickname, // Include senderNickname if the backend needs it
+            createAt: getLocalDateTimeString()
         };
         websocket.send(JSON.stringify(chatMessage));
         $("#message").val("");
@@ -328,24 +401,44 @@ function sendMessage() {
 
 function showMessage(message) {
     const messagesContainer = $("#messages");
-    const isMyMessage = message.senderIdx === userIdx;
+    const isMyMessage = message.user.idx === userIdx;
 
     const alignment = isMyMessage ? 'right' : 'left';
 
     const messageContainer = $("<div>").addClass(`message-container ${alignment}`);
     const bubble = $("<div>").addClass(`message-bubble ${alignment}`);
     const sender = $("<div>").addClass('sender-name');
-    const msg = $("<div>").text(message.message || '');
+    
+    let content;
+    if (message.type === 'IMAGE') {
+        content = $('<a>').attr('href', message.message).attr('target', '_blank');
+        content.append($('<img>').attr('src', message.message).addClass('img-thumbnail'));
+    } else if (message.type === 'FILE') {
+        const fileName = message.message.split('/').pop();
+        content = $('<a>').attr('href', message.message).attr('target', '_blank').text(fileName);
+    } else {
+        content = $("<div>").text(message.message || '');
+    }
 
     if (!isMyMessage) {
-        sender.text(message.senderNickname || 'Unknown');
+        let senderNickname = message.user.nickName ? message.user.nickName : message.user.name
+        sender.text(senderNickname || 'Unknown');
         bubble.append(sender);
     }
 
-    bubble.append(msg);
+    bubble.append(content); // Use the new content element
     messageContainer.append(bubble);
     messagesContainer.append(messageContainer);
 
     // Scroll to the bottom
     messagesContainer.scrollTop(messagesContainer[0].scrollHeight);
+}
+
+function getLocalDateTimeString() {
+    const now = new Date();
+
+    const pad = (n) => String(n).padStart(2, "0");
+
+    return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}` +
+        `T${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
 }
