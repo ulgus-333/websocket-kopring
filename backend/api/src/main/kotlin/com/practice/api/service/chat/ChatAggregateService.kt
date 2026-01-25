@@ -4,10 +4,12 @@ import com.practice.api.domain.dto.CustomOAuth2User
 import com.practice.api.domain.presentation.request.chat.CreateChatRoomRequestDto
 import com.practice.api.domain.presentation.response.chat.ChatRoomResponseDto
 import com.practice.api.domain.presentation.response.chat.ChatRoomsResponseDto
+import com.practice.api.domain.presentation.response.chat.MessageResponseDto
 import com.practice.api.domain.presentation.response.chat.MessagesResponseDto
 import com.practice.common.domain.entity.chat.Room
 import com.practice.common.domain.entity.chat.UserRoomRelation
 import com.practice.common.domain.entity.user.User
+import com.practice.infra.service.file.FileService
 import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -20,7 +22,8 @@ import java.util.stream.Stream
 class ChatAggregateService(
     private val roomService: RoomService,
     private val relationService: UserRoomRelationService,
-    private val messageService: MessageService
+    private val messageService: MessageService,
+    private val fileService: FileService
 ) {
     fun findRoomsByUserIdx(userIdx: Long, pageable: Pageable): ChatRoomsResponseDto {
         val pagedRelation = relationService.findPagedUserRoomRelationByUserIdx(userIdx, pageable)
@@ -52,7 +55,7 @@ class ChatAggregateService(
         return ChatRoomResponseDto.of(myRelation, users)
     }
 
-    fun getRoomMessages(requestUser: CustomOAuth2User, roomIdx: Long, pageable: Pageable): MessagesResponseDto? {
+    fun getRoomMessages(requestUser: CustomOAuth2User, roomIdx: Long, pageable: Pageable): MessagesResponseDto {
         val relations = relationService.findUserRoomRelationByRoomIdx(roomIdx)
 
         if (!relations.containUser(requestUser.userIdx())) {
@@ -60,7 +63,16 @@ class ChatAggregateService(
         }
 
         val messages = messageService.findMessagesByRoomIdx(roomIdx, pageable)
-        return MessagesResponseDto.from(messages)
+
+        val responseMessage = messages.map { message ->
+            if (message.isFileType()) {
+                val filePath = fileService.generateParReadUrl(message.message).parUrl
+                return@map MessageResponseDto.from(message, filePath)
+            }
+            return@map MessageResponseDto.from(message)
+        }
+
+        return MessagesResponseDto.from(responseMessage)
     }
 
     fun resetUnreadCount(requestUser: CustomOAuth2User, roomIdx: Long) {

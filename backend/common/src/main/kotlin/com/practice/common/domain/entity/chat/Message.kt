@@ -35,5 +35,20 @@ class Message private constructor (
     @Column(nullable = false, columnDefinition = "boolean")
     @ColumnDefault(value = "false")
     val isDelete: Boolean,
-    ) {
+) {
+    companion object {
+        fun new(type: MessageType, message: String, user: User, room: Room, createAt: LocalDateTime): Message
+            = Message(
+                type = type,
+                message = message,
+                user = user,
+                room = room,
+                createAt = createAt,
+                isDelete = false
+            )
+    }
+
+    fun isFileType(): Boolean {
+        return this.type == MessageType.IMAGE || this.type == MessageType.FILE
+    }
 }

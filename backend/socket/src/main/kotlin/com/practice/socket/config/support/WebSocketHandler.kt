@@ -1,10 +1,22 @@
 package com.practice.socket.config.support
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.practice.common.domain.dto.MessagePayload
+import com.practice.common.domain.entity.chat.MessageFile
+import com.practice.common.repository.chat.MessageFileRepository
+import com.practice.common.repository.chat.MessageRepository
+import com.practice.common.repository.chat.RoomRepository
+import com.practice.common.repository.user.UserRepository
+import com.practice.infra.service.file.FileService
 import com.practice.socket.config.WebSocketConfig
+import com.practice.socket.domain.presentation.response.MessageResponseDto
+import jakarta.annotation.PostConstruct
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import org.springframework.web.socket.CloseStatus
+import org.springframework.web.socket.TextMessage
 import org.springframework.web.socket.WebSocketMessage
 import org.springframework.web.socket.WebSocketSession
 import org.springframework.web.socket.handler.TextWebSocketHandler
@@ -12,7 +24,19 @@ import org.springframework.web.util.UriTemplate
 import java.util.concurrent.ConcurrentHashMap
 
 @Component
-class WebSocketHandler: TextWebSocketHandler() {
+class WebSocketHandler(
+    private val objectMapper: ObjectMapper,
+    private val userRepository: UserRepository,
+    private val roomRepository: RoomRepository,
+    private val messageRepository: MessageRepository,
+    private val messageFileRepository: MessageFileRepository,
+    private val fileService: FileService,
+): TextWebSocketHandler() {
+    @PostConstruct
+    fun init() {
+        objectMapper.registerModule(JavaTimeModule())
+    }
+
     private val logger: Logger = LoggerFactory.getLogger(WebSocketHandler::class.java)
 
     companion object {
@@ -52,10 +76,27 @@ class WebSocketHandler: TextWebSocketHandler() {
     override fun handleMessage(session: WebSocketSession, message: WebSocketMessage<*>) {
         logger.info("{} send message: {}", session.id, message.payload)
 
+        val payload = objectMapper.readValue(message.payload as String, MessagePayload::class.java)
+
+        val user = userRepository.findById(payload.userIdx).orElseThrow()
+        val room = roomRepository.findById(payload.roomIdx).orElseThrow()
+        val newMessage = payload.convertToEntity(user, room)
+        messageRepository.save(newMessage)
+
+        var response: MessageResponseDto? = null;
+
+        if (newMessage.isFileType()) {
+            messageFileRepository.save(MessageFile.new(newMessage))
+            val filePath = fileService.generateParReadUrl(newMessage.message).parUrl
+            response = MessageResponseDto.from(newMessage, filePath)
+        }
+
+        response?:(MessageResponseDto.from(newMessage))
+
         session.uri?.let { sessionUri ->
             val roomId = extractRoomId(sessionUri.path)
             rooms[roomId]?.let {
-                it.forEach { s -> s.sendMessage(message) }
+                it.forEach { s -> s.sendMessage(TextMessage(objectMapper.writeValueAsString(response))) }
             }
         }
     }
