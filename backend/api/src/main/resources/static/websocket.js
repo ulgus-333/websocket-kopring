@@ -219,7 +219,8 @@ function connectToRoom(roomIdx, roomName) {
     }
     $("#messages").empty();
 
-    const url = 'ws://' + window.location.host + '/ws/chats/' + roomIdx;
+    const url = 'ws://localhost:8081/ws/chats/' + roomIdx;
+    console.log(url)
     websocket = new WebSocket(url);
 
     websocket.onopen = function(event) {
