@@ -92,7 +92,14 @@ class User private constructor (
     fun update(nickname: String?, imageUrl: String?) {
         this.nickname = nickname
         imageUrl?.let { this.imageUrl = imageUrl }
-            ?:let { this.nickname = DEFAULT_PROFILE }
+            ?:let { this.imageUrl = DEFAULT_PROFILE }
+    }
+
+    fun validateUpdatableProfileImg(requestImageUrl: String?): Boolean {
+        return this.imageUrl.isNullOrBlank()
+                && !this.imageUrl.equals(requestImageUrl)
+                && this.imageUrl?.startsWith("http") == true
+                && this.imageUrl.equals(DEFAULT_PROFILE)
     }
 
     fun role(): String {

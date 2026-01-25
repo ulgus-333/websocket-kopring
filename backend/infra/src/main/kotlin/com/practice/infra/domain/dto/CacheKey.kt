@@ -8,7 +8,7 @@ enum class CacheKey (
     private val parameterCount: Int,
     private val expire: Duration
 ) {
-    OCI_PAR_KEY(CacheKeyPrefix.OCI, "PAR::%s::%s", 2, Duration.ofMinutes(5)),
+    OCI_PAR_KEY(CacheKeyPrefix.OCI, "PAR::%s::%s::%s", 3, Duration.ofMinutes(5)),
     OCI_USER_READ_KEY(CacheKeyPrefix.OCI, "PAR::READ::%s::%s", 2, Duration.ofDays(1)),
     ;
 

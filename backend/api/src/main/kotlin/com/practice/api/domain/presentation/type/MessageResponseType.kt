@@ -5,6 +5,7 @@ import com.practice.common.domain.entity.type.MessageType
 enum class MessageResponseType {
     TEXT,
     IMAGE,
+    FILE,
     SYSTEM,
     ;
 
@@ -14,6 +15,7 @@ enum class MessageResponseType {
                 MessageType.TEXT -> TEXT
                 MessageType.SYSTEM -> SYSTEM
                 MessageType.IMAGE -> IMAGE
+                MessageType.FILE -> FILE
             }
     }
 }

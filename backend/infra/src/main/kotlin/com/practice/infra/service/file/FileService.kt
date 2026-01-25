@@ -28,9 +28,9 @@ class FileService (
         private const val WRITE_ACCESS_TYPE = "ObjectWrite"
     }
 
-    fun generateParWriteUrl(pathType: FilePathType, fileName: String, cacheKey: String, vararg pathArgs: String?): ParPathDto {
+    fun generateParWriteUrl(pathType: FilePathType, fileName: String, cacheKey: String, variables: List<String>): ParPathDto {
         val expireAt = Date.from(Instant.now().plus(OciProperties.WRITE_EXPIRE_DURATION))
-        val filePath = pathType.generateFilePath(pathArgs.toString()) + fileName
+        val filePath = pathType.generateFilePath(*variables.toTypedArray()) + fileName
 
         val writeUrl = generateParUrl(filePath, WRITE_ACCESS_TYPE, expireAt)
 
@@ -59,7 +59,7 @@ class FileService (
     fun expireRemainPar(pathType: FilePathType, fileName: String, cacheKey: String) {
         val parIdCacheKey = CacheKey.OCI_PAR_KEY.generateKey(pathType.name, cacheKey, fileName)
 
-        redisService.get(cacheKey, PARCacheDto::class.java)
+        redisService.get(parIdCacheKey, PARCacheDto::class.java)
             ?.let {
                 val request = DeletePreauthenticatedRequestRequest.builder()
                     .namespaceName(ociProperties.namespace)

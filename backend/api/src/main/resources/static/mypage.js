@@ -6,12 +6,14 @@ document.addEventListener('DOMContentLoaded', function () {
     const resetImageButton = document.getElementById('reset-image-button');
 
     let profileImagePath = '';
-    let uploadedFileName = ''; 
+    let uploadedFileName = '';
+    let userIdx = '';
 
     // Fetch current user's data and display it
     fetch('/user')
         .then(response => response.json())
         .then(data => {
+            userIdx = data.idx
             nicknameInput.value = data.nickName;
             if (data.profileImage) {
                 profileImagePreview.src = data.profileImage;
@@ -50,7 +52,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 },
                 body: JSON.stringify({
                     pathType: 'PROFILE',
-                    filename: file.name
+                    filename: file.name,
+                    variables: [userIdx]
                 }),
             });
             if (!response.ok) {
@@ -94,6 +97,7 @@ document.addEventListener('DOMContentLoaded', function () {
             ...(newNickname && {nickname: newNickname}),
             profileImageUrl: profileImagePath
         };
+        console.log(payload)
 
         fetch('/user/profile', {
             method: 'PATCH',
@@ -105,7 +109,7 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(response => {
             if (response.ok) {
                 if (uploadedFileName) {
-                    fetch(`/files/presigned/expire?pathType=PROFILE&filename=${uploadedFileName}`, {
+                    fetch(`/files/presigned/expire?pathType=PROFILE&filename=${uploadedFileName}&variables=${userIdx}`, {
                         method: 'DELETE'
                     })
                     .finally(() => {

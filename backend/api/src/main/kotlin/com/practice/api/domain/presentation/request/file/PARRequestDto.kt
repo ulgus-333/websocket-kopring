@@ -6,5 +6,6 @@ import jakarta.validation.constraints.NotNull
 data class PARRequestDto(
     @NotNull
     val pathType: FilePathRequestType,
-    val filename: String
+    val filename: String,
+    val variables: List<String>
 )
