@@ -90,40 +90,65 @@ body {
 }
 
 .file-card {
-    background-color: #f8f9fa;
-    border: 1px solid #dee2e6;
-    border-radius: 10px;
-    padding: 10px;
-    display: inline-block;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    box-sizing: border-box;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 1px solid #e5e5e5;
+    background: #fff;
     text-decoration: none;
-    color: #212529;
-    max-width: 250px;
+    color: #1f1f1f;
+    cursor: pointer;
 }
 
 .file-card:hover {
-    background-color: #e9ecef;
-    text-decoration: none;
-    color: #212529;
+    background-color: #f6f7f9;
 }
 
-.file-card .file-icon {
-    font-size: 2em;
-    margin-right: 10px;
-}
-
-.file-card .file-info {
+.file-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+    line-height: 1;
 }
 
-.file-card .file-name {
-    font-weight: bold;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+.file-icon.pdf { background: #e74c3c; }
+.file-icon.xlsx { background: #27ae60; }
+.file-icon.zip { background: #34495e; }
+.file-icon.png,
+.file-icon.jpg { background: #8e44ad; }
+
+.file-info {
+  flex: 1;
+  overflow: hidden;
 }
 
-.file-card .file-size {
-    font-size: 0.8em;
-    color: #6c757d;
+.file-name {
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.file-meta {
+  font-size: 12px;
+  color: #888;
+}
+
+.file-download {
+    font-size: 18px;
+    opacity: 0.6;
+    flex-shrink: 0;
+    pointer-events: none; /* 핵심 */
 }

@@ -415,12 +415,29 @@ function showMessage(message) {
         content.append($('<img>').attr('src', message.message).addClass('img-thumbnail').css({'max-width': '300px', 'max-height': '300px'}));
     } else if (message.type === 'FILE') {
         const decodedFileName = decodeURIComponent(message.message.split('/').pop());
+        const fileExtension = decodedFileName.split('.').pop().toLowerCase();
+
         content = $('<a>').attr('href', message.message).attr('target', '_blank').addClass('file-card');
+
+        // File Icon
+        const fileIcon = $('<div>').addClass('file-icon');
+        if (['pdf', 'xlsx', 'zip', 'png', 'jpg'].includes(fileExtension)) {
+            fileIcon.addClass(fileExtension);
+        }
+        fileIcon.text(fileExtension.toUpperCase());
+
+        // File Info
         const fileInfo = $('<div>').addClass('file-info');
         fileInfo.append($('<div>').addClass('file-name').text(decodedFileName));
-        // You can add file size here if available in the message
-        // fileInfo.append($('<div>').addClass('file-size').text('1.2 MB'));
+        // We can add file size here if available in message
+        // fileInfo.append($('<div>').addClass('file-meta').text('1.2MB'));
+
+        // Download Icon
+        const fileDownload = $('<div>').addClass('file-download').html('&#x2B07;'); // Unicode for down arrow
+
+        content.append(fileIcon);
         content.append(fileInfo);
+        content.append(fileDownload);
     } else {
         content = $("<div>").text(message.message || '');
     }
