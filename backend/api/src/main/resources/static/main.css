@@ -88,3 +88,42 @@ body {
 .navbar-default .navbar-toggle .icon-bar {
     background-color: #333;
 }
+
+.file-card {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 10px;
+    padding: 10px;
+    display: inline-block;
+    text-decoration: none;
+    color: #212529;
+    max-width: 250px;
+}
+
+.file-card:hover {
+    background-color: #e9ecef;
+    text-decoration: none;
+    color: #212529;
+}
+
+.file-card .file-icon {
+    font-size: 2em;
+    margin-right: 10px;
+}
+
+.file-card .file-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.file-card .file-name {
+    font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.file-card .file-size {
+    font-size: 0.8em;
+    color: #6c757d;
+}

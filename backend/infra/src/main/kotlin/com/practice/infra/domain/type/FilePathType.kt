@@ -5,7 +5,7 @@ enum class FilePathType (
     private val paramCount: Int
 ) {
     PROFILE("user/profiles/%s/", 1),
-    CHAT_ATTACHMENT("chat/attachments/%s/%s", 2),
+    CHAT_ATTACHMENT("chat/attachments/%s/%s/", 2),
     ;
 
     fun generateFilePath(vararg variables: String?): String {

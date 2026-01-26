@@ -412,10 +412,15 @@ function showMessage(message) {
     let content;
     if (message.type === 'IMAGE') {
         content = $('<a>').attr('href', message.message).attr('target', '_blank');
-        content.append($('<img>').attr('src', message.message).addClass('img-thumbnail'));
+        content.append($('<img>').attr('src', message.message).addClass('img-thumbnail').css({'max-width': '300px', 'max-height': '300px'}));
     } else if (message.type === 'FILE') {
-        const fileName = message.message.split('/').pop();
-        content = $('<a>').attr('href', message.message).attr('target', '_blank').text(fileName);
+        const decodedFileName = decodeURIComponent(message.message.split('/').pop());
+        content = $('<a>').attr('href', message.message).attr('target', '_blank').addClass('file-card');
+        const fileInfo = $('<div>').addClass('file-info');
+        fileInfo.append($('<div>').addClass('file-name').text(decodedFileName));
+        // You can add file size here if available in the message
+        // fileInfo.append($('<div>').addClass('file-size').text('1.2 MB'));
+        content.append(fileInfo);
     } else {
         content = $("<div>").text(message.message || '');
     }
