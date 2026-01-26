@@ -3,15 +3,16 @@
 > 단일 서버가 아닌 멀티모듈을 통한 모로레포 형식으로 구현하여 각 역할을 분리하여 구현할 수 있도록 한다.
 
 ### Stack
-> Java 17 (Kotlin)
-> SpringBoot 3.5.9
-> Plain WebSocket
-> Mysql
-> Redis
-> JPA
-> OCI
-> OAuth2
-> Spring Security
+> Java 17 (Kotlin)\
+> SpringBoot 3.5.9\
+> Plain WebSocket\
+> Mysql\
+> Redis\
+> JPA\
+> OCI\
+> OAuth2\
+> Spring Security\
 
 ### 특이사항
-Client View에는 크게 중요성을 두지 않고 정상동작을 확인하기 위한 목적으로 가볍게 구현되었으며, 기능의 연결에 대한 기본적인 수정작업 외에 틀을 잡거나, 전체적인 코드 구성은 Gemini를 통해 구축
+- Client View에는 크게 중요성을 두지 않고 정상동작을 확인하기 위한 목적으로 가볍게 구현되었으며, 기능의 연결에 대한 기본적인 수정작업 외에 틀을 잡거나, 전체적인 코드 구성은 Gemini를 통해 구축
+- MySQL, OCI, OAuth2 등 민감 접속정보는 public repository이기 때문에 로컬에서 .env 파일 구성 후 서비스 실행시 environment에 주입해서 사용
