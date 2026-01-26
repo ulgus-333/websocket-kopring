@@ -8,6 +8,9 @@ import com.practice.common.repository.chat.MessageFileRepository
 import com.practice.common.repository.chat.MessageRepository
 import com.practice.common.repository.chat.RoomRepository
 import com.practice.common.repository.user.UserRepository
+import com.practice.infra.domain.dto.CacheKey
+import com.practice.infra.domain.type.FilePathType
+import com.practice.infra.service.cache.RedisService
 import com.practice.infra.service.file.FileService
 import com.practice.socket.config.WebSocketConfig
 import com.practice.socket.domain.presentation.response.MessageResponseDto
@@ -31,6 +34,7 @@ class WebSocketHandler(
     private val messageRepository: MessageRepository,
     private val messageFileRepository: MessageFileRepository,
     private val fileService: FileService,
+    private val redisService: RedisService,
 ): TextWebSocketHandler() {
     @PostConstruct
     fun init() {
@@ -86,12 +90,14 @@ class WebSocketHandler(
         var response: MessageResponseDto? = null;
 
         if (newMessage.isFileType()) {
-            messageFileRepository.save(MessageFile.new(newMessage))
-            val filePath = fileService.generateParReadUrl(newMessage.message).parUrl
-            response = MessageResponseDto.from(newMessage, filePath)
+            val messageFile = messageFileRepository.save(MessageFile.new(newMessage))
+            val parPathDto = fileService.generateParReadUrl(newMessage.message)
+            response = MessageResponseDto.from(newMessage, parPathDto.parUrl)
+            val cacheKey = CacheKey.OCI_USER_READ_KEY.generateKey(messageFile.idx.toString(), FilePathType.CHAT_ATTACHMENT.name)
+            redisService.set(cacheKey, parPathDto, CacheKey.OCI_USER_READ_KEY.expire())
         }
 
-        response?:(MessageResponseDto.from(newMessage))
+        response = response?:(MessageResponseDto.from(newMessage))
 
         session.uri?.let { sessionUri ->
             val roomId = extractRoomId(sessionUri.path)

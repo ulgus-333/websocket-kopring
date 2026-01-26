@@ -9,6 +9,10 @@ import com.practice.api.domain.presentation.response.chat.MessagesResponseDto
 import com.practice.common.domain.entity.chat.Room
 import com.practice.common.domain.entity.chat.UserRoomRelation
 import com.practice.common.domain.entity.user.User
+import com.practice.infra.domain.dto.CacheKey
+import com.practice.infra.domain.dto.ParPathDto
+import com.practice.infra.domain.type.FilePathType
+import com.practice.infra.service.cache.RedisService
 import com.practice.infra.service.file.FileService
 import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
@@ -23,7 +27,8 @@ class ChatAggregateService(
     private val roomService: RoomService,
     private val relationService: UserRoomRelationService,
     private val messageService: MessageService,
-    private val fileService: FileService
+    private val fileService: FileService,
+    private val redisService: RedisService
 ) {
     fun findRoomsByUserIdx(userIdx: Long, pageable: Pageable): ChatRoomsResponseDto {
         val pagedRelation = relationService.findPagedUserRoomRelationByUserIdx(userIdx, pageable)
@@ -66,7 +71,9 @@ class ChatAggregateService(
 
         val responseMessage = messages.map { message ->
             if (message.isFileType()) {
-                val filePath = fileService.generateParReadUrl(message.message).parUrl
+                val cacheKey = CacheKey.OCI_USER_READ_KEY.generateKey(message.file!!.idx.toString(), FilePathType.CHAT_ATTACHMENT.name)
+                val filePath = redisService.get(cacheKey, ParPathDto::class.java)?.parUrl
+                    ?: let { fileService.generateParReadUrl(message.message).parUrl }
                 return@map MessageResponseDto.from(message, filePath)
             }
             return@map MessageResponseDto.from(message)

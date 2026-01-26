@@ -35,6 +35,9 @@ class Message private constructor (
     @Column(nullable = false, columnDefinition = "boolean")
     @ColumnDefault(value = "false")
     val isDelete: Boolean,
+
+    @OneToOne(mappedBy = "message", fetch = FetchType.LAZY)
+    val file: MessageFile? = null
 ) {
     companion object {
         fun new(type: MessageType, message: String, user: User, room: Room, createAt: LocalDateTime): Message
